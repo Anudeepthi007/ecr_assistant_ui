@@ -1,0 +1,53 @@
+# ECR Intelligence Agent - full local stack.
+#   docker compose up --build
+#   frontend  http://localhost:3000
+#   backend   http://localhost:8000   (Swagger at /docs)
+#
+# Data lives in the CSV files under backend/data. They are mounted into the
+# container, so changes made by the app (new ECRs, reports, feedback) land in
+# your checkout.
+services:
+  backend:
+    build:
+      context: ./backend
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      DATA_DIR: /data
+      VECTOR_STORE: ${VECTOR_STORE:-memory}
+      EMBEDDING_DIM: ${EMBEDDING_DIM:-1024}
+      # LLM - leave unset to run fully offline in demo mode.
+      LLM_PROVIDER: ${LLM_PROVIDER:-auto}
+      LLM_NARRATION: ${LLM_NARRATION:-false}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o}
+      OPENAI_FAST_MODEL: ${OPENAI_FAST_MODEL:-}
+      OPENAI_EMBEDDING_MODEL: ${OPENAI_EMBEDDING_MODEL:-text-embedding-3-small}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT:-}
+      AZURE_OPENAI_API_KEY: ${AZURE_OPENAI_API_KEY:-}
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+    volumes:
+      - ./backend/data:/data
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        REACT_APP_BACKEND_URL: ${REACT_APP_BACKEND_URL:-http://localhost:8000}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # Optional: enable with `docker compose --profile cache up`
+  redis:
+    image: redis:7-alpine
+    profiles: ["cache"]
+    ports:
+      - "6379:6379"

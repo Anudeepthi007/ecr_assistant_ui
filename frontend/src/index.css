@@ -12,6 +12,7 @@ body {
         sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background: #080c17;
 }
 
 code {
@@ -20,58 +21,33 @@ code {
 }
 
 @layer base {
-    :root {
-        --background: 0 0% 100%;
-        --foreground: 0 0% 3.9%;
-        --card: 0 0% 100%;
-        --card-foreground: 0 0% 3.9%;
-        --popover: 0 0% 100%;
-        --popover-foreground: 0 0% 3.9%;
-        --primary: 0 0% 9%;
-        --primary-foreground: 0 0% 98%;
-        --secondary: 0 0% 96.1%;
-        --secondary-foreground: 0 0% 9%;
-        --muted: 0 0% 96.1%;
-        --muted-foreground: 0 0% 45.1%;
-        --accent: 0 0% 96.1%;
-        --accent-foreground: 0 0% 9%;
-        --destructive: 0 84.2% 60.2%;
-        --destructive-foreground: 0 0% 98%;
-        --border: 0 0% 89.8%;
-        --input: 0 0% 89.8%;
-        --ring: 0 0% 3.9%;
-        --chart-1: 12 76% 61%;
-        --chart-2: 173 58% 39%;
-        --chart-3: 197 37% 24%;
-        --chart-4: 43 74% 66%;
-        --chart-5: 27 87% 67%;
-        --radius: 0.5rem;
-    }
+    /*
+     * Single dark enterprise theme. The app is deliberately dark-only, so the
+     * tokens are defined once on :root and .dark alike - a light stamp must not
+     * produce a half-themed page.
+     */
+    :root,
     .dark {
-        --background: 0 0% 3.9%;
-        --foreground: 0 0% 98%;
-        --card: 0 0% 3.9%;
-        --card-foreground: 0 0% 98%;
-        --popover: 0 0% 3.9%;
-        --popover-foreground: 0 0% 98%;
-        --primary: 0 0% 98%;
-        --primary-foreground: 0 0% 9%;
-        --secondary: 0 0% 14.9%;
-        --secondary-foreground: 0 0% 98%;
-        --muted: 0 0% 14.9%;
-        --muted-foreground: 0 0% 63.9%;
-        --accent: 0 0% 14.9%;
-        --accent-foreground: 0 0% 98%;
-        --destructive: 0 62.8% 30.6%;
-        --destructive-foreground: 0 0% 98%;
-        --border: 0 0% 14.9%;
-        --input: 0 0% 14.9%;
-        --ring: 0 0% 83.1%;
-        --chart-1: 220 70% 50%;
-        --chart-2: 160 60% 45%;
-        --chart-3: 30 80% 55%;
-        --chart-4: 280 65% 60%;
-        --chart-5: 340 75% 55%;
+        --background: 222 47% 6%;      /* #080c17 page plane */
+        --foreground: 213 31% 95%;
+        --card: 220 44% 10%;           /* #0f1626 chart/card surface */
+        --card-foreground: 213 31% 95%;
+        --popover: 220 44% 10%;
+        --popover-foreground: 213 31% 95%;
+        --primary: 213 76% 56%;        /* #3987e5 */
+        --primary-foreground: 0 0% 100%;
+        --secondary: 220 33% 16%;
+        --secondary-foreground: 213 31% 95%;
+        --muted: 220 30% 15%;
+        --muted-foreground: 219 14% 60%;
+        --accent: 258 68% 62%;         /* violet accent */
+        --accent-foreground: 0 0% 100%;
+        --destructive: 0 61% 53%;      /* #d03b3b status critical */
+        --destructive-foreground: 0 0% 100%;
+        --border: 220 30% 18%;
+        --input: 220 30% 18%;
+        --ring: 213 76% 56%;
+        --radius: 0.65rem;
     }
 }
 
@@ -84,34 +60,59 @@ code {
     }
 }
 
-@layer base {
-    [data-debug-wrapper="true"] {
-        display: contents !important;
+@layer components {
+    /* Elevated dark surface used by every panel in the app. */
+    .surface {
+        @apply rounded-xl border border-border/80 bg-card/80 backdrop-blur-sm;
+        box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.03) inset,
+            0 16px 40px -24px rgba(0, 0, 0, 0.9);
     }
 
-    [data-debug-wrapper="true"] > * {
-        margin-left: inherit;
-        margin-right: inherit;
-        margin-top: inherit;
-        margin-bottom: inherit;
-        padding-left: inherit;
-        padding-right: inherit;
-        padding-top: inherit;
-        padding-bottom: inherit;
-        column-gap: inherit;
-        row-gap: inherit;
-        gap: inherit;
-        border-left-width: inherit;
-        border-right-width: inherit;
-        border-top-width: inherit;
-        border-bottom-width: inherit;
-        border-left-style: inherit;
-        border-right-style: inherit;
-        border-top-style: inherit;
-        border-bottom-style: inherit;
-        border-left-color: inherit;
-        border-right-color: inherit;
-        border-top-color: inherit;
-        border-bottom-color: inherit;
+    .eyebrow-label {
+        @apply text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground;
     }
+
+    .stat-value {
+        @apply text-3xl font-semibold tracking-tight text-foreground;
+    }
+
+    /* Ambient AI-network glow behind the hero areas. */
+    .glow-grid {
+        background-image:
+            radial-gradient(60rem 30rem at 15% -10%, rgba(57, 135, 229, 0.16), transparent 60%),
+            radial-gradient(50rem 26rem at 85% 0%, rgba(124, 92, 232, 0.14), transparent 60%),
+            linear-gradient(rgba(255, 255, 255, 0.022) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.022) 1px, transparent 1px);
+        background-size: auto, auto, 44px 44px, 44px 44px;
+    }
+
+    .scroll-thin::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    .scroll-thin::-webkit-scrollbar-thumb {
+        background: hsl(var(--border));
+        border-radius: 999px;
+    }
+    .scroll-thin::-webkit-scrollbar-track {
+        background: transparent;
+    }
+}
+
+/* Pulsing dot for a running agent. */
+@keyframes pulse-ring {
+    0% { box-shadow: 0 0 0 0 rgba(57, 135, 229, 0.55); }
+    70% { box-shadow: 0 0 0 10px rgba(57, 135, 229, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(57, 135, 229, 0); }
+}
+.pulse-ring {
+    animation: pulse-ring 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes dash-flow {
+    to { stroke-dashoffset: -24; }
+}
+.dash-flow {
+    stroke-dasharray: 6 6;
+    animation: dash-flow 1.1s linear infinite;
 }
