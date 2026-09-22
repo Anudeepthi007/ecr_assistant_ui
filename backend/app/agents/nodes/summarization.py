@@ -90,9 +90,7 @@ def build_answer_context(state: dict[str, Any]) -> dict[str, Any]:
             ][:10]
         ],
         "tests": {
-            "total_available": selection.get("total_available"),
             "recommended": len(selection.get("selected_tests") or []),
-            "reduction_percentage": selection.get("reduction_percentage"),
             "priority_distribution": selection.get("priority_distribution"),
             "top": [
                 {
@@ -183,8 +181,7 @@ def _baseline_answer(context: dict[str, Any]) -> str:
     if tests.get("recommended"):
         distribution = tests.get("priority_distribution") or {}
         parts.append(
-            f"Recommended regression: {tests['recommended']} of {tests['total_available']} tests "
-            f"({tests['reduction_percentage']}% reduction), "
+            f"Recommended regression: {tests['recommended']} test(s) from the ECR's own test cases, "
             f"{distribution.get('P0', 0)} P0 and {distribution.get('P1', 0)} P1."
         )
     approval_sentence = _approval_sentence(context.get("human_approval") or {})

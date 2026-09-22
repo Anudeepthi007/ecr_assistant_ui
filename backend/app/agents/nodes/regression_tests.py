@@ -190,9 +190,8 @@ def test_selection_step(state: dict[str, Any]) -> dict[str, Any]:
 
     confidence = round(min(0.95, 0.55 + 0.25 * bool(selected) + 0.15 * bool(context.matched_requirements)), 3)
     reasoning = (
-        f"Scored {len(discovered)} candidate(s) against the impact model and selected "
-        f"{len(selected)} test(s) out of a {total_available}-test regression suite "
-        f"({reduction:.1f}% reduction)."
+        f"Scored {len(discovered)} candidate(s) from this ECR's own test cases and selected "
+        f"{len(selected)} test(s)."
     )
 
     selection = TestSelection(

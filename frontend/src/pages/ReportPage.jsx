@@ -70,14 +70,14 @@ export default function ReportPage() {
           />
           <Metric
             label="Recommended tests"
-            value={`${metrics.selected_tests || 0} / ${metrics.total_tests || 0}`}
-            hint={`${Number(metrics.reduction_percentage || 0).toFixed(0)}% reduction`}
+            value={`${metrics.selected_tests || 0}`}
+            hint="from this ECR's own test cases"
           />
           <Metric
             label="Correlated artifacts"
             // reports saved before the artefact -> artifact rename
             value={metrics.correlated_artifacts ?? metrics.correlated_artefacts ?? 0}
-            hint={`${metrics.correlated_links || 0} typed links`}
+            hint={`${metrics.correlated_links || 0} links, all within this ECR`}
           />
         </div>
 
@@ -90,10 +90,12 @@ export default function ReportPage() {
 
       <section className="space-y-4">
         {report.sections
-          ?.filter((section) => section.key !== "execution_trace")
+          ?.filter((section) => !["execution_trace", "code_impact"].includes(section.key))
           .map((section) => (
             <div key={section.key} className="surface p-5">
-              <h3 className="text-sm font-semibold">{section.title}</h3>
+              <h3 className="text-sm font-semibold">
+                {section.key === "historical_defects" ? "Historical Analysis" : section.title}
+              </h3>
               {/* Mitigations' body is the same list as its data (kept for text exports); show it once. */}
               {section.body && !(section.key === "mitigations" && section.data?.mitigations?.length) && (
                 <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">

@@ -40,10 +40,6 @@ export default function DashboardPage() {
                 ["Total ECRs", stats.total_ecrs],
                 ["Analysed ECRs", stats.analysed_ecrs],
                 [
-                  "Average regression reduction",
-                  stats.analysed_ecrs ? `${Math.round(stats.average_regression_reduction)}%` : "-",
-                ],
-                [
                   "Average analysis time",
                   stats.analysed_ecrs ? `${Number(stats.average_analysis_seconds).toFixed(1)}s` : "-",
                 ],
@@ -63,13 +59,7 @@ export default function DashboardPage() {
                 {
                   key: "tests",
                   label: "Tests",
-                  render: (row) => `${row.selected_tests} of ${row.total_tests}`,
-                  className: "tabular-nums",
-                },
-                {
-                  key: "reduction",
-                  label: "Reduction",
-                  render: (row) => `${Math.round(row.reduction_percentage)}%`,
+                  render: (row) => `${row.selected_tests}`,
                   className: "tabular-nums",
                 },
                 {

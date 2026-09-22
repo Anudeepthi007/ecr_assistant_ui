@@ -83,7 +83,7 @@ def correlation_agent(state: dict[str, Any]) -> dict[str, Any]:
     result["_confidence"] = _average(result.get("step_confidence") or {})
     result["_reasoning"] = (
         f"{len(impact.get('directly_impacted_components') or [])} component(s) change directly; selected "
-        f"{len(selection.get('selected_tests') or [])} of {selection.get('total_available')} tests. "
+        f"{len(selection.get('selected_tests') or [])} test(s) from the ECR's own test cases. "
         f"{'LLM' if review.get('source') == 'llm' else 'Rule-based'} review found "
         f"{len(review.get('conflicts') or [])} contradiction(s) and {len(review.get('gaps') or [])} gap(s)."
     )

@@ -436,6 +436,9 @@ Start here, in this order:
 
 | # | Document | Contents |
 |---|---|---|
+| - | [docs/Technical-Architecture.pdf](docs/Technical-Architecture.pdf) | One-page architecture flow (ECR-1 and ECR-2) |
+| - | [docs/ECR-High-Level-Diagram.png](docs/ECR-High-Level-Diagram.png) | High-level block diagram for the Proposed Solution slide |
+| - | [docs/ECR-Intelligent-Agent-POC-Final.pptx](docs/ECR-Intelligent-Agent-POC-Final.pptx) | POC presentation (ECR-1 and ECR-2) |
 | 1 | [docs/architecture.md](docs/architecture.md) | System, agent, data and RAG architecture with diagrams |
 | 2 | [docs/agent-design.md](docs/agent-design.md) | Each agent and step, its tools, its contract, its failure mode |
 | 3 | [docs/api-documentation.md](docs/api-documentation.md) | Endpoint reference with examples |

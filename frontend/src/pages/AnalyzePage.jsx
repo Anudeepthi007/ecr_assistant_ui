@@ -179,7 +179,7 @@ export default function AnalyzePage() {
             </div>
           </Expander>
 
-          <Expander title="Defect Analysis">
+          <Expander title="Historical Analysis">
             <DefectSection
               insights={current.defect_insights}
               summary={current.defect_summary}
@@ -322,7 +322,7 @@ function SummaryCard({ ecr, analysis }) {
     ],
     [
       "Recommended Tests",
-      `${selected} of ${selection.total_available || 0} (${Math.round(selection.reduction_percentage || 0)}% fewer), ` +
+      `${selected} from this ECR's own test cases, ` +
         `${distribution.P0 || 0} P0 and ${distribution.P1 || 0} P1`,
     ],
     [
@@ -390,10 +390,7 @@ function TestsSection({ tests, selection }) {
     <div className="space-y-3">
       {selection && (
         <p className="text-sm">
-          {selection.selected_tests?.length || 0} of {selection.total_available} tests recommended
-          {selection.reduction_percentage
-            ? ` - ${Math.round(selection.reduction_percentage)}% fewer to run.`
-            : "."}
+          {selection.selected_tests?.length || 0} tests recommended from this ECR's own test cases.
         </p>
       )}
       <PreviewTable

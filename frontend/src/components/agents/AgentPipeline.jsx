@@ -32,7 +32,6 @@ export const AGENTS = [
 /** Evidence the Gather step may collect; the planner can skip the optional ones. */
 export const INVESTIGATION_LABELS = {
   requirements: "Impacted requirements",
-  code_impact: "Code impact",
   historical_defects: "Similar historical defects",
   dependencies: "Component dependencies",
   collaboration_retrieval: "Review comments and evidence",

@@ -174,8 +174,6 @@ def select_tests(state: dict[str, Any]) -> dict[str, Any]:
         parts,
         {
             "selected_tests": len(selection.get("selected_tests") or []),
-            "total_available": selection.get("total_available"),
-            "reduction_percentage": selection.get("reduction_percentage"),
             "defects_analysed": insights.get("total", 0),
             "defects_likely_to_return": insights.get("high", 0),
             "contradictions": len(review.get("conflicts") or []),

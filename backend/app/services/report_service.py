@@ -18,10 +18,9 @@ SECTION_ORDER = [
     ("ecr_overview", "Steps to Reproduce"),
     ("change_classification", "Change Classification"),
     ("affected_requirements", "Affected Requirements"),
-    ("historical_defects", "Defect Analysis"),
+    ("historical_defects", "Historical Analysis"),
     ("team_signals", "Review Comments and Evidence"),
     ("correlation_findings", "Correlation Findings"),
-    ("code_impact", "Code Impact"),
     ("dependency_impact", "Dependency Impact"),
     ("impacted_components", "Impacted Components"),
     ("recommended_tests", "Recommended Regression Tests"),
@@ -121,7 +120,6 @@ def _build_sections(report: ECRIntelligenceReport, state: dict[str, Any]) -> lis
     requirement_analysis = state.get("requirement_analysis") or {}
     defect_analysis = state.get("defect_analysis") or {}
     dependency = state.get("dependency_analysis") or {}
-    code_impact = state.get("code_impact") or {}
     classification = state.get("ecr_analysis") or {}
 
     sections: list[ReportSection] = []
@@ -169,13 +167,6 @@ def _build_sections(report: ECRIntelligenceReport, state: dict[str, Any]) -> lis
             ]
             body = "\n".join([review.get("summary", ""), *lines]).strip()
             data = review
-        elif key == "code_impact":
-            body = code_impact.get("reasoning", "")
-            data = {
-                "files": code_impact.get("directly_impacted_files", []),
-                "apis": code_impact.get("impacted_apis", []),
-                "symbols": code_impact.get("impacted_symbols", [])[:15],
-            }
         elif key == "dependency_impact":
             body = dependency.get("reasoning", "Dependency analysis was not required for this change.")
             data = {
@@ -232,18 +223,8 @@ def render_markdown(report: ECRIntelligenceReport) -> str:
         "",
     ]
     metrics = report.metrics
-    if metrics.get("total_tests"):
-        lines += [
-            "## Regression Optimisation",
-            "",
-            f"| Metric | Value |",
-            f"| --- | --- |",
-            f"| Full regression suite | {metrics.get('total_tests', 0)} tests |",
-            f"| Candidates discovered | {metrics.get('candidate_tests', 0)} tests |",
-            f"| AI recommended | {metrics.get('selected_tests', 0)} tests |",
-            f"| Reduction | {metrics.get('reduction_percentage', 0)}% |",
-            "",
-        ]
+    if metrics.get("selected_tests"):
+        lines += [f"- Recommended tests: **{metrics.get('selected_tests', 0)}** (from this ECR's own test cases)", ""]
     for section in report.sections:
         if section.key in ("executive_summary",):
             lines += [f"## {section.title}", "", section.body or "_Not available._", ""]
@@ -319,8 +300,7 @@ def render_html(report: ECRIntelligenceReport) -> str:
 <h1>ECR Intelligence Report</h1>
 <div class="meta">{esc(report.ecr_id)} &middot; {esc(report.title)} &middot; generated {esc(report.generated_at.isoformat())}</div>
 <div class="score">Confidence<br/><b>{esc(round(report.confidence.overall * 100))}%</b> {esc(report.confidence.band.value)}</div>
-<div class="score">Regression<br/><b>{esc(report.metrics.get('selected_tests', 0))}</b> of {esc(report.metrics.get('total_tests', 0))} tests
- ({esc(report.metrics.get('reduction_percentage', 0))}% reduction)</div>
+<div class="score">Recommended tests<br/><b>{esc(report.metrics.get('selected_tests', 0))}</b> from this ECR's own test cases</div>
 {sections_html}
 <section><h2>Recommended Regression Tests</h2>
 <table><thead><tr><th>Test</th><th>Priority</th><th>Relevance</th><th>Component</th><th>Why selected</th></tr></thead>

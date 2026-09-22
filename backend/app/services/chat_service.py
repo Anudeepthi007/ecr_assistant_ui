@@ -215,8 +215,8 @@ def _deterministic_answer(
         distribution = selection.get("priority_distribution", {})
         top = ", ".join(t["test_case_id"] for t in (selection.get("selected_tests") or [])[:8])
         return (
-            f"{len(selection.get('selected_tests') or [])} of {selection.get('total_available')} "
-            f"regression tests are recommended ({selection.get('reduction_percentage')}% reduction): "
+            f"{len(selection.get('selected_tests') or [])} regression test(s) from the ECR's own test "
+            f"cases are recommended: "
             f"{distribution.get('P0', 0)} P0, {distribution.get('P1', 0)} P1, "
             f"{distribution.get('P2', 0)} P2, {distribution.get('P3', 0)} P3. "
             f"Start with {top}."
