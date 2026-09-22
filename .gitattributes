@@ -1,0 +1,7 @@
+# Never change line endings in binary documents
+*.pdf binary
+*.pptx binary
+*.docx binary
+*.png binary
+*.jpg binary
+*.zip binary
