@@ -101,7 +101,14 @@ def requirement_step(state: dict[str, Any]) -> dict[str, Any]:
     )
     confidence = _confidence(matches)
     baseline = (
-        f"Searched {searched_total} requirements across traceability, semantic and keyword "
+        (
+            f"Used the {len(matches)} requirement(s) linked to this ECR in its change record. Strongest "
+            f"match is {matches[0].requirement_id} ({matches[0].title}) at {matches[0].relevance:.0f}% relevance."
+            if matches
+            else "No requirement is linked to this ECR in its change record."
+        )
+        if scoped
+        else f"Searched {searched_total} requirements across traceability, semantic and keyword "
         f"channels and matched {len(matches)}. Strongest match is "
         f"{matches[0].requirement_id} ({matches[0].title}) at {matches[0].relevance:.0f}% relevance."
         if matches

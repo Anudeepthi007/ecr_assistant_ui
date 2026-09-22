@@ -157,6 +157,16 @@ def _build_sections(report: ECRIntelligenceReport, state: dict[str, Any]) -> lis
                 "risks": (collaboration.get("signals") or {}).get("risks", []),
                 "open_concerns": collaboration.get("open_concerns", []),
                 "evidence_gaps": collaboration.get("evidence_gaps", []),
+                "comments": [
+                    {"comment_id": c.get("comment_id"), "author": c.get("author"),
+                     "category": c.get("category"), "text": c.get("text") or c.get("content", "")}
+                    for c in state.get("comments") or []
+                ],
+                "evidence": [
+                    {"evidence_id": e.get("evidence_id"), "title": e.get("title"),
+                     "evidence_type": e.get("evidence_type"), "outcome": e.get("outcome")}
+                    for e in state.get("evidence") or []
+                ],
             }
         elif key == "correlation_findings":
             review = state.get("correlation_review") or {}
@@ -182,6 +192,13 @@ def _build_sections(report: ECRIntelligenceReport, state: dict[str, Any]) -> lis
             }
         elif key == "recommended_tests":
             body = selection.get("reasoning", "")
+            approval = state.get("approval") or {}
+            if approval.get("status") == "REJECTED":
+                who = approval.get("decided_by") or "a reviewer"
+                body = (
+                    f"ON HOLD: {who} rejected this analysis, so these tests are not released for "
+                    f"execution yet. {body}"
+                )
             data = {
                 "selected": selection.get("selected_tests", []),
                 "metrics": report.metrics,
@@ -193,8 +210,17 @@ def _build_sections(report: ECRIntelligenceReport, state: dict[str, Any]) -> lis
                 "strategy": prioritization.get("strategy", ""),
             }
         elif key == "mitigations":
-            body = "\n".join(f"- {item}" for item in report.mitigations)
-            data = {"mitigations": report.mitigations}
+            approval = state.get("approval") or {}
+            actions = list(report.mitigations)
+            if approval.get("status") == "REJECTED":
+                who = approval.get("decided_by") or "the reviewer"
+                actions.insert(
+                    0,
+                    f"Hold the test recommendation: {who} rejected this analysis. Address the reason, "
+                    f"then re-run and approve before executing the tests.",
+                )
+            body = "\n".join(f"- {item}" for item in actions)
+            data = {"mitigations": actions}
         elif key == "confidence":
             body = (
                 f"Overall confidence {report.confidence.overall:.0%} "
@@ -237,6 +263,12 @@ def render_markdown(report: ECRIntelligenceReport) -> str:
                     f"{requirement['relevance']:.0f}% ({requirement['match_type']}): {requirement['reason']}"
                 )
             lines.append("")
+        if section.key == "team_signals":
+            for item in section.data.get("evidence", []):
+                lines.append(f"- **{item['evidence_id']}** {item['title']} ({item.get('outcome') or 'recorded'})")
+            for item in section.data.get("comments", []):
+                lines.append(f"- **{item['comment_id']}** {item.get('author', '')}: {item.get('text', '')}")
+            lines.append("")
         if section.key == "historical_defects":
             for defect in section.data.get("defects", []):
                 if defect.get("chance_of_recurrence"):
@@ -274,8 +306,20 @@ def render_html(report: ECRIntelligenceReport) -> str:
         if section.key == "recommended_tests"
         for t in section.data.get("selected", [])[:80]
     )
+    def section_list(s: ReportSection) -> str:
+        if s.key != "team_signals":
+            return ""
+        items = [
+            f"<li><b>{esc(e['evidence_id'])}</b> {esc(e['title'])} ({esc(e.get('outcome') or 'recorded')})</li>"
+            for e in s.data.get("evidence", [])
+        ] + [
+            f"<li><b>{esc(c['comment_id'])}</b> {esc(c.get('author', ''))}: {esc(c.get('text', ''))}</li>"
+            for c in s.data.get("comments", [])
+        ]
+        return f"<ul>{''.join(items)}</ul>" if items else ""
+
     sections_html = "".join(
-        f"<section><h2>{esc(s.title)}</h2><p>{esc(s.body).replace(chr(10), '<br/>')}</p></section>"
+        f"<section><h2>{esc(s.title)}</h2><p>{esc(s.body).replace(chr(10), '<br/>')}</p>{section_list(s)}</section>"
         for s in report.sections
         if s.key not in ("recommended_tests", "execution_trace")
     )

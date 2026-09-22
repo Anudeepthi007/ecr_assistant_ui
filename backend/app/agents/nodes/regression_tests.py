@@ -102,7 +102,10 @@ def test_discovery_step(state: dict[str, Any]) -> dict[str, Any]:
     }
     confidence = round(min(0.95, 0.5 + 0.3 * bool(by_requirement) + 0.15 * bool(candidates)), 3)
     reasoning = (
-        f"Discovered {len(candidates)} unique candidate test(s) out of {total_available} "
+        f"Found {len(candidates)} test case(s) from this ECR's own data: the test cases it lists "
+        f"and the tests of its linked requirements."
+        if scoped
+        else f"Discovered {len(candidates)} unique candidate test(s) out of {total_available} "
         f"{domain or 'catalogue'} test(s): {channels['requirement_trace']} via requirement traceability, "
         f"{channels['component_coverage']} via component coverage and "
         f"{channels['semantic_search']} via semantic search."

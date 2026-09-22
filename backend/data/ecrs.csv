@@ -50,7 +50,7 @@ Scenario
 -begin Initializing
 -send 1010 ""Command locomotive system state to Non-controlling"" at Begin Depart Test prompt
 -Press Depart test key at cutout and observe 2011 report
-Observe Depart test shows depart test report as Failed even though no departure test is performed after prvious depart test is passed",ANALYSED,UNCLASSIFIED,Onboard,Change Board,MEDIUM,,"[""L2R26"", ""L2R35""]","[""onboard/departure_test.py""]","{""domain"": ""rail"", ""source"": ""change-tracking export""}",ECR,System Verified,Medium,"[""Deepak Yadav""]","[""Depart Test""]","[""Depart Test""]",6.5.7.0.ENG1,,16 hours,4,"May 6, 2026, 2:42 PM","Jun 9, 2026, 3:27 PM",[],4 hours,"[""L2R26:TC1"", ""L2R26:TC2"", ""L2R26:TC3"", ""L2R35:TC1"", ""L2R35:TC2""]",,,,"[""test.log"", ""Fixed_ecr.rtf""]",2026-09-17T06:45:00.935774,2026-09-22T11:35:22.627105
+Observe Depart test shows depart test report as Failed even though no departure test is performed after prvious depart test is passed",ANALYSED,UNCLASSIFIED,Onboard,Change Board,MEDIUM,,"[""L2R26"", ""L2R35""]","[""onboard/departure_test.py""]","{""domain"": ""rail"", ""source"": ""change-tracking export""}",ECR,System Verified,Medium,"[""Deepak Yadav""]","[""Depart Test""]","[""Depart Test""]",6.5.7.0.ENG1,,16 hours,4,"May 6, 2026, 2:42 PM","Jun 9, 2026, 3:27 PM",[],4 hours,"[""L2R26:TC1"", ""L2R26:TC2"", ""L2R26:TC3"", ""L2R35:TC1"", ""L2R35:TC2""]",,,,"[""test.log"", ""Fixed_ecr.rtf""]",2026-09-17T06:45:00.935774,2026-09-22T18:03:21.036141
 ECR-2,Port Build 7 ECR -2 to Build 8: Flrt3: Horn state doesn't change on brake/horn interface screen,"When the Horn key is pressed on the ""brake/horn interface"" screen, Ob doesn't update the Horn state field to Active, and it continues to show Inactive on the screen.
 
 This is working fine on ""EBI Slot 6 - EBI Onboard Diagnostics"" and ""System Test - Brakes"" Screen.
@@ -60,4 +60,4 @@ This issue is only observed for SR-FLRT3-DMU. For SR-KSS_EMU, Ob is working corr
 3. Go to the Brake/Horn interface row and press the show details key
 4. Ensure OB displays the Brake/Horn interface screen
 5. Press the Horn key
-6. Observe OB keep showing Horn state as Inactive","On pressing the Horn key, OB keeps showing the Horn state field status as Inactive",OB should update the horn state field as Active,"[""Logs.zip"", ""dev_logs.log"", ""test artifacts.zip""]",2026-09-17T06:45:00.935777,2026-09-22T11:33:58.651278
+6. Observe OB keep showing Horn state as Inactive","On pressing the Horn key, OB keeps showing the Horn state field status as Inactive",OB should update the horn state field as Active,"[""Logs.zip"", ""dev_logs.log"", ""test artifacts.zip""]",2026-09-17T06:45:00.935777,2026-09-22T17:38:21.397170

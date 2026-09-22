@@ -113,8 +113,11 @@ def defect_step(state: dict[str, Any]) -> dict[str, Any]:
         3,
     )
     baseline = (
-        f"Searched {searched_total} historical defects and found {len(matches)} related to this "
-        f"change. "
+        (
+            f"Checked the past defects linked to this ECR's own requirements and found {len(matches)}. "
+            if scoped
+            else f"Searched {searched_total} historical defects and found {len(matches)} related to this change. "
+        )
         + (
             f"Recurring patterns: {'; '.join(patterns)}. "
             if patterns

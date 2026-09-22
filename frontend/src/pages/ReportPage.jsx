@@ -20,6 +20,7 @@ export default function ReportPage() {
 
   const confidence = report.confidence || {};
   const metrics = report.metrics || {};
+  const onHold = report.approval?.status === "REJECTED";
 
   return (
     <div className="space-y-6">
@@ -62,7 +63,7 @@ export default function ReportPage() {
           </div>
         </div>
 
-        <div className="mt-5 grid gap-3 sm:grid-cols-3">
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Metric
             label="Confidence"
             value={`${Math.round((confidence.overall || 0) * 100)}%`}
@@ -72,6 +73,18 @@ export default function ReportPage() {
             label="Recommended tests"
             value={`${metrics.selected_tests || 0}`}
             hint="from this ECR's own test cases"
+          />
+          <Metric
+            label="Human approval"
+            value={report.approval?.required ? (report.approval.status || "PENDING").replace("_", " ") : "Not requested"}
+            hint={
+              report.approval?.required
+                ? report.approval.status === "REJECTED"
+                  ? `Rejected by ${report.approval.decided_by || "a reviewer"} - recommendation on hold`
+                  : `${report.approval.status === "APPROVED" ? "Approved by " + (report.approval.decided_by || "a reviewer") : "No decision in time"}`
+                : "Tick Require approval before analysing"
+            }
+            color={report.approval?.status === "REJECTED" ? "#fab219" : undefined}
           />
           <Metric
             label="Correlated artifacts"
@@ -95,14 +108,25 @@ export default function ReportPage() {
             <div key={section.key} className="surface p-5">
               <h3 className="text-sm font-semibold">
                 {section.key === "historical_defects" ? "Historical Analysis" : section.title}
+                {onHold && ["recommended_tests", "test_prioritization", "mitigations"].includes(section.key) && (
+                  <span className="ml-2 rounded border border-[#fab219]/40 bg-[#fab219]/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#fab219]">
+                    On hold
+                  </span>
+                )}
               </h3>
+              {onHold && section.key === "recommended_tests" && (
+                <p className="mt-2 rounded border border-[#fab219]/40 bg-[#fab219]/10 px-3 py-2 text-xs text-[#fab219]">
+                  {report.approval?.decided_by || "A reviewer"} rejected this analysis, so these tests are not
+                  released for execution yet.
+                </p>
+              )}
               {/* Mitigations' body is the same list as its data (kept for text exports); show it once. */}
               {section.body && !(section.key === "mitigations" && section.data?.mitigations?.length) && (
                 <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
                   {section.body}
                 </p>
               )}
-              <SectionData section={section} />
+              <SectionData section={section} analysis={analysis} />
             </div>
           ))}
       </section>
@@ -137,7 +161,7 @@ function matchLabel(matchType) {
     .join(" + ");
 }
 
-function SectionData({ section }) {
+function SectionData({ section, analysis }) {
   const { key, data } = section;
   if (key === "affected_requirements" && data.requirements?.length) {
     return (
@@ -209,22 +233,46 @@ function SectionData({ section }) {
     );
   }
   if (key === "team_signals") {
+    // Reports saved before evidence was stored on the section fall back to the analysis itself.
+    const evidence = data.evidence || analysis?.evidence || [];
+    const comments = data.comments || analysis?.comments || [];
     return (
-      <div className="mt-3 grid gap-3 md:grid-cols-2">
-        {["decisions", "risks"].map((bucket) =>
-          data[bucket]?.length ? (
-            <div key={bucket}>
-              <div className="eyebrow-label">{bucket}</div>
-              <ul className="mt-1.5 space-y-1.5 text-xs text-muted-foreground">
-                {data[bucket].slice(0, 4).map((item) => (
-                  <li key={item.comment_id}>
-                    <span className="text-foreground">{item.author}</span>: {item.text}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null
-        )}
+      <div className="mt-3 space-y-3">
+        <div>
+          <div className="eyebrow-label">Evidence ({evidence.length})</div>
+          {evidence.length ? (
+            <ul className="mt-1.5 space-y-1.5 text-xs">
+              {evidence.map((item) => (
+                <li key={item.evidence_id} className="flex flex-wrap items-baseline gap-2">
+                  <span className="font-mono text-primary">{item.evidence_id}</span>
+                  <span className="text-foreground">{item.title}</span>
+                  {item.outcome && (
+                    <span className="rounded border border-border/70 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
+                      {item.outcome}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-1.5 text-xs text-muted-foreground">No evidence is attached to this ECR.</p>
+          )}
+        </div>
+        <div>
+          <div className="eyebrow-label">Review comments ({comments.length})</div>
+          {comments.length ? (
+            <ul className="mt-1.5 space-y-1.5 text-xs text-muted-foreground">
+              {comments.map((item) => (
+                <li key={item.comment_id}>
+                  <span className="font-mono text-primary">{item.comment_id}</span>{" "}
+                  <span className="text-foreground">{item.author}</span>: {item.text || item.content}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-1.5 text-xs text-muted-foreground">No review comments on this ECR.</p>
+          )}
+        </div>
       </div>
     );
   }

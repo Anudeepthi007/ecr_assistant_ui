@@ -124,6 +124,8 @@ export default function AnalyzePage() {
         </Expander>
       )}
 
+      {current?.approval?.required && <ApprovalBanner approval={current.approval} />}
+
       {current && impact && (
         <>
           <Expander title="Execution Trace">
@@ -158,8 +160,14 @@ export default function AnalyzePage() {
             />
           </Expander>
 
-          <Expander title="Recommended Test Cases">
-            <TestsSection tests={tests} selection={selection} />
+          <Expander
+            title={
+              current.approval?.status === "REJECTED"
+                ? "Recommended Test Cases - ON HOLD"
+                : "Recommended Test Cases"
+            }
+          >
+            <TestsSection tests={tests} selection={selection} approval={current.approval} />
           </Expander>
 
           <Expander title="Impacted Components">
@@ -385,9 +393,14 @@ function SummaryCard({ ecr, analysis }) {
   );
 }
 
-function TestsSection({ tests, selection }) {
+function TestsSection({ tests, selection, approval }) {
   return (
     <div className="space-y-3">
+      {approval?.status === "REJECTED" && (
+        <p className="rounded border border-[#fab219]/40 bg-[#fab219]/10 px-3 py-2 text-xs text-[#fab219]">
+          On hold: {approval.decided_by || "a reviewer"} rejected this analysis, so these tests are not released yet.
+        </p>
+      )}
       {selection && (
         <p className="text-sm">
           {selection.selected_tests?.length || 0} tests recommended from this ECR's own test cases.
@@ -569,6 +582,30 @@ function FollowUp({ ecrId }) {
           {asking ? "Thinking..." : "Ask"}
         </Button>
       </form>
+    </div>
+  );
+}
+
+function ApprovalBanner({ approval }) {
+  const status = approval.status;
+  const who = approval.decided_by || "a reviewer";
+  const styles = {
+    APPROVED: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
+    REJECTED: "border-[#fab219]/40 bg-[#fab219]/10 text-[#fab219]",
+    TIMED_OUT: "border-border/70 bg-background/40 text-muted-foreground",
+  }[status] || "border-border/70 bg-background/40 text-muted-foreground";
+  const text = {
+    APPROVED: `Approved by ${who}. The recommended tests are released for execution.`,
+    REJECTED: `Rejected by ${who}. The test recommendation is on hold - do not run this suite until it is approved.`,
+    TIMED_OUT: "No decision was made in time, so the analysis was published without an approval.",
+  }[status] || `Approval ${status || "pending"}.`;
+  return (
+    <div className={`rounded-lg border px-4 py-3 text-sm ${styles}`}>
+      <span className="font-semibold">Human approval: {status?.replace("_", " ") || "pending"}</span> - {text}
+      {approval.excluded_test_ids?.length > 0 && (
+        <span> Removed from the recommendation: {approval.excluded_test_ids.join(", ")}.</span>
+      )}
+      {approval.comment && <span> Comment: "{approval.comment}"</span>}
     </div>
   );
 }
