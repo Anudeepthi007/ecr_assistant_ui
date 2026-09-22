@@ -75,7 +75,7 @@ def test_discovery_step(state: dict[str, Any]) -> dict[str, Any]:
         payload["test_case_id"]: float(payload.get("semantic_score", 0.0)) for payload in semantic_hits
     }
     # Hybrid retrieval scores saturate well below 100 on short enterprise
-    # artefacts, so normalise against the best hit in this candidate set. The
+    # artifacts, so normalise against the best hit in this candidate set. The
     # factor then measures "how close to the best semantic match is this test",
     # which is what the P0..P3 bands are calibrated against.
     best_semantic = max(raw_semantic.values(), default=0.0)
@@ -192,8 +192,7 @@ def test_selection_step(state: dict[str, Any]) -> dict[str, Any]:
     reasoning = (
         f"Scored {len(discovered)} candidate(s) against the impact model and selected "
         f"{len(selected)} test(s) out of a {total_available}-test regression suite "
-        f"({reduction:.1f}% reduction). Estimated execution {estimated:.0f} minutes versus "
-        f"{baseline_minutes:.0f} minutes for the full suite."
+        f"({reduction:.1f}% reduction)."
     )
 
     selection = TestSelection(
@@ -238,20 +237,20 @@ def test_prioritization_step(state: dict[str, Any]) -> dict[str, Any]:
 
     strategy = (
         "Priority first: highest priority band, then the most business critical component, then "
-        "relevance, then shortest runtime so failures surface early."
+        "relevance, then shortest first so failures surface early."
     )
     confidence = round(min(0.95, 0.6 + 0.3 * bool(ordered)), 3)
     baseline = (
         f"Ordered {len(ordered)} test(s): {len(waves['P0'])} P0, {len(waves['P1'])} P1, "
-        f"{len(waves['P2'])} P2, {len(waves['P3'])} P3. P0 and P1 complete in about "
-        f"{critical_minutes:.0f} minutes, the whole selection in {total_minutes:.0f} minutes."
+        f"{len(waves['P2'])} P2, {len(waves['P3'])} P3. Run the P0 and P1 bands first, "
+        f"then the rest of the selection."
     )
+    # Execution-time estimates are deliberately kept out of the narrative and out of
+    # the model's context, so no report claims how long a suite takes to run.
     reasoning = get_llm().narrate(
         task="Explain the recommended regression execution order",
         context={
             "waves": {k: v[:6] for k, v in waves.items()},
-            "critical_minutes": critical_minutes,
-            "total_minutes": total_minutes,
             "strategy": strategy,
         },
         fallback=baseline,

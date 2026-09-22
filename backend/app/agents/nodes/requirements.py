@@ -39,6 +39,7 @@ def requirement_step(state: dict[str, Any]) -> dict[str, Any]:
             db,
             ecr.get("linked_requirements") or [],
             analysis.get("candidate_components") or [],
+            ecr=ecr,
         )
         keyword_hits = [] if scoped else keyword_requirement_search(db, keywords)
         searched_total = db.query(Requirement).count()
@@ -148,6 +149,12 @@ def requirement_step(state: dict[str, Any]) -> dict[str, Any]:
 def _reason(payload: dict[str, Any]) -> str:
     match_type = payload.get("match_type", "SEMANTIC")
     if "TRACEABILITY" in match_type:
+        named = payload.get("named_test_count") or 0
+        if named:
+            return (
+                f"Explicitly linked to the ECR in the change record, which names "
+                f"{named} of its test case(s) as affected."
+            )
         return "Explicitly linked to the ECR in the change record."
     if "COMPONENT_LINK" in match_type:
         return f"Traced through component {payload.get('component')} identified in the change."

@@ -70,7 +70,7 @@ Case-insensitive. `404` when unknown.
 ### `GET /api/ecr/{ecr_id}/sources`
 
 The raw multi-source view *before* correlation: the change record, every review
-comment, every evidence artefact and the last analysis summary.
+comment, every evidence artifact and the last analysis summary.
 
 ### `GET /api/ecr/{ecr_id}/history`
 
@@ -138,8 +138,6 @@ Falls back to the last persisted report when the live run has been evicted.
   "total_available": 170,
   "selected": 67,
   "reduction_percentage": 60.6,
-  "estimated_duration_minutes": 179.2,
-  "baseline_duration_minutes": 424.1,
   "priority_distribution": { "P0": 9, "P1": 24, "P2": 34, "P3": 0 },
   "waves": { "P0": ["TC-1020"], "P1": [], "P2": [], "P3": [] },
   "tests": [
@@ -236,7 +234,7 @@ source.addEventListener("done", () => source.close());
 }
 ```
 
-Intents: `ANALYZE`, `TEST_RECOMMENDATION`, `EXPLAIN_ARTEFACT`, `QUESTION`,
+Intents: `ANALYZE`, `TEST_RECOMMENDATION`, `EXPLAIN_ARTIFACT`, `QUESTION`,
 `SEARCH`. The ECR is resolved from an explicit id first, then by semantic search;
 when neither works the assistant says so rather than guessing.
 
@@ -246,7 +244,7 @@ when neither works the assistant says so rather than guessing.
 { "question": "Why was TC-1042 selected?" }
 ```
 
-Named artefacts are pulled into a `focus` block (score breakdown, reasons,
+Named artifacts are pulled into a `focus` block (score breakdown, reasons,
 linked requirement) so the answer is specific.
 
 ### `GET /api/chat/intent?query=...`

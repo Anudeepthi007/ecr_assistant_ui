@@ -74,8 +74,9 @@ export default function ReportPage() {
             hint={`${Number(metrics.reduction_percentage || 0).toFixed(0)}% reduction`}
           />
           <Metric
-            label="Correlated artefacts"
-            value={metrics.correlated_artefacts || 0}
+            label="Correlated artifacts"
+            // reports saved before the artefact -> artifact rename
+            value={metrics.correlated_artifacts ?? metrics.correlated_artefacts ?? 0}
             hint={`${metrics.correlated_links || 0} typed links`}
           />
         </div>
@@ -93,7 +94,8 @@ export default function ReportPage() {
           .map((section) => (
             <div key={section.key} className="surface p-5">
               <h3 className="text-sm font-semibold">{section.title}</h3>
-              {section.body && (
+              {/* Mitigations' body is the same list as its data (kept for text exports); show it once. */}
+              {section.body && !(section.key === "mitigations" && section.data?.mitigations?.length) && (
                 <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
                   {section.body}
                 </p>
@@ -118,15 +120,33 @@ function Metric({ label, value, hint, color }) {
   );
 }
 
+const MATCH_LABELS = {
+  TRACEABILITY: "Linked",
+  COMPONENT_LINK: "Via component",
+  SEMANTIC: "Similar text",
+  KEYWORD: "Keyword",
+};
+
+// A requirement found through several channels carries a combined type ("TRACEABILITY+SEMANTIC").
+function matchLabel(matchType) {
+  return (matchType || "SEMANTIC")
+    .split("+")
+    .map((part) => MATCH_LABELS[part] || part)
+    .join(" + ");
+}
+
 function SectionData({ section }) {
   const { key, data } = section;
   if (key === "affected_requirements" && data.requirements?.length) {
     return (
       <ul className="mt-3 space-y-1.5 text-xs">
         {data.requirements.map((requirement) => (
-          <li key={requirement.requirement_id} className="flex flex-wrap gap-2">
+          <li key={requirement.requirement_id} className="flex flex-wrap items-baseline gap-2">
             <span className="font-mono text-primary">{requirement.requirement_id}</span>
             <span className="text-foreground">{requirement.title}</span>
+            <span className="rounded border border-border/70 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
+              {matchLabel(requirement.match_type)}
+            </span>
             <span className="text-muted-foreground">
               {Math.round(requirement.relevance)}% - {requirement.reason}
             </span>

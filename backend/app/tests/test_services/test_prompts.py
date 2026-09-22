@@ -17,6 +17,9 @@ TEMPLATES = {
         "ecr_id",
         "title",
         "description",
+        "steps_to_reproduce",
+        "observed_behavior",
+        "expected_behavior",
         "changed_files",
         "linked_requirements",
         "classification",
@@ -27,6 +30,8 @@ TEMPLATES = {
     "SUMMARY_TASK": {"question", "bundle", "defect_instruction"},
     "SUMMARY_DEFECT_INSTRUCTION": {"ecr_id"},
     "NARRATION_TASK": {"task", "context", "fallback"},
+    "CHAT_TASK": {"question", "ecr_id", "bundle", "focus"},
+    "CHAT_FOCUS": {"focus"},
 }
 
 SYSTEM_PROMPTS = [

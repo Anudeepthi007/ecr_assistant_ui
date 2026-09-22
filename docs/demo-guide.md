@@ -40,7 +40,7 @@ Narrate while the agents run:
    pulls requirements, code impact, historical defects, dependency reach, review
    comments and evidence. Watch the steps tick over individually.
 2. **Correlation Agent** - finds the impacted components, discovers candidate
-   tests through three channels, selects and orders them, links every artefact to
+   tests through three channels, selects and orders them, links every artifact to
    the ECR, then has the LLM read the whole bundle for contradictions and gaps.
 3. **Summarization Agent** - writes the answer and the defect summary in one LLM
    reply, then assembles the report.

@@ -108,6 +108,27 @@ def build_answer_context(state: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+# Evidence belongs to the "Review Comments and Evidence" section of the report, not
+# to the executive summary - the summary answers what changed and what to test, and
+# "no evidence attached" reads as a finding about the change itself. The chat
+# assistant still gets the full bundle from build_answer_context().
+SUMMARY_EXCLUDED_KEYS = ("evidence", "evidence_gaps")
+
+
+def summary_context(context: dict[str, Any]) -> dict[str, Any]:
+    """The answer bundle with every evidence signal removed."""
+    scoped = {k: v for k, v in context.items() if k not in SUMMARY_EXCLUDED_KEYS}
+    findings = dict(scoped.get("correlation_findings") or {})
+    for bucket in ("contradictions", "gaps", "key_links"):
+        findings[bucket] = [
+            item
+            for item in findings.get(bucket) or []
+            if (item or {}).get("kind") != "EVIDENCE"
+        ]
+    scoped["correlation_findings"] = findings
+    return scoped
+
+
 def _defect_context(state: dict[str, Any]) -> list[dict[str, Any]]:
     analysed = {row["defect_id"]: row for row in (state.get("defect_insights") or {}).get("defects") or []}
     out = []
@@ -165,10 +186,6 @@ def _baseline_answer(context: dict[str, Any]) -> str:
             f"Recommended regression: {tests['recommended']} of {tests['total_available']} tests "
             f"({tests['reduction_percentage']}% reduction), "
             f"{distribution.get('P0', 0)} P0 and {distribution.get('P1', 0)} P1."
-        )
-    if context["evidence_gaps"]:
-        parts.append(
-            "Evidence is missing for: " + ", ".join(context["evidence_gaps"][:4]) + "."
         )
     approval_sentence = _approval_sentence(context.get("human_approval") or {})
     if approval_sentence:
@@ -303,8 +320,11 @@ def summarization_step(state: dict[str, Any]) -> dict[str, Any]:
     question = (options.get("question") or "").strip() or DEFAULT_QUESTION
     ecr_id = state.get("ecr_id", "this ECR")
     context = build_answer_context(state)
+    # The answer is written from the evidence-free view; the full bundle is still
+    # returned in state for the chat assistant and the API.
+    scoped = summary_context(context)
     insights = state.get("defect_insights") or {}
-    baseline = _baseline_answer(context)
+    baseline = _baseline_answer(scoped)
     defect_baseline = _baseline_defect_summary(ecr_id, insights)
     # Matched defects are rewritten by the model; a history-only summary stays factual.
     rewrite_defects = bool(insights.get("defects"))
@@ -315,7 +335,7 @@ def summarization_step(state: dict[str, Any]) -> dict[str, Any]:
         reply = llm.generate_structured(
             SUMMARY_TASK.format(
                 question=question,
-                bundle=json.dumps(context, default=str)[:14000],
+                bundle=json.dumps(scoped, default=str)[:14000],
                 defect_instruction=(
                     SUMMARY_DEFECT_INSTRUCTION.format(ecr_id=ecr_id)
                     if rewrite_defects

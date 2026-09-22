@@ -14,7 +14,7 @@ from typing import Any
 from sqlalchemy.orm import Session
 
 from app.agents.nodes.summarization import build_answer_context
-from app.prompts import ANSWER_SYSTEM_PROMPT
+from app.prompts import ANSWER_SYSTEM_PROMPT, CHAT_FOCUS, CHAT_TASK
 from app.agents.runtime import registry
 from app.llm.provider import get_llm
 from app.logging import get_logger
@@ -27,7 +27,7 @@ logger = get_logger("ecr.chat")
 # ECR-2026-001 as well as short ids such as ECR-1
 ECR_ID_RE = re.compile(r"\b(ECR[- ]?\d{1,6}(?:[- ]\d{1,6})?)\b", re.IGNORECASE)
 # L2R26:TC1 (test ids from the export) before the plain identifier forms
-ARTEFACT_RE = re.compile(
+ARTIFACT_RE = re.compile(
     r"\b(L2R\d{1,6}:\s?TC\d{1,4}|(?:REQ|BUG|TC|CMT|EV|PTC|L2R)[- ]?\d{2,6})\b", re.IGNORECASE
 )
 
@@ -43,13 +43,13 @@ def detect_intent(query: str) -> dict[str, Any]:
     if ecr_match:
         digits = re.split(r"[- ]", re.sub(r"^ECR[- ]?", "", ecr_match.group(1).upper()))
         ecr_id = "ECR-" + "-".join(part for part in digits if part)
-    artefacts = [
+    artifacts = [
         m.group(1).upper().replace(" ", "") if ":" in m.group(1) else m.group(1).upper().replace(" ", "-")
-        for m in ARTEFACT_RE.finditer(query)
+        for m in ARTIFACT_RE.finditer(query)
     ]
 
-    if any(verb in lowered for verb in WHY_VERBS) and artefacts:
-        intent = "EXPLAIN_ARTEFACT"
+    if any(verb in lowered for verb in WHY_VERBS) and artifacts:
+        intent = "EXPLAIN_ARTIFACT"
     elif any(verb in lowered for verb in TEST_VERBS):
         intent = "TEST_RECOMMENDATION"
     elif any(verb in lowered for verb in ANALYZE_VERBS):
@@ -58,7 +58,7 @@ def detect_intent(query: str) -> dict[str, Any]:
         intent = "QUESTION"
     else:
         intent = "SEARCH"
-    return {"intent": intent, "ecr_id": ecr_id, "artefacts": artefacts}
+    return {"intent": intent, "ecr_id": ecr_id, "artifacts": artifacts}
 
 
 def resolve_ecr(db: Session, query: str, ecr_id: str | None) -> str | None:
@@ -122,11 +122,16 @@ def answer_question(
     else:
         baseline = _deterministic_answer(state, detection, focus)
         answer = llm.generate(
-            f"QUESTION: {question}\n\n"
-            f"CORRELATED BUNDLE FOR {resolved}:\n"
-            f"{json.dumps(context, indent=2, default=str)[:12000]}\n\n"
-            + (f"FOCUS ARTEFACTS:\n{json.dumps(focus, indent=2, default=str)[:4000]}\n\n" if focus else "")
-            + "Answer in at most 6 sentences, citing the identifiers you used.",
+            CHAT_TASK.format(
+                question=question,
+                ecr_id=resolved,
+                bundle=json.dumps(context, indent=2, default=str)[:12000],
+                focus=(
+                    CHAT_FOCUS.format(focus=json.dumps(focus, indent=2, default=str)[:4000])
+                    if focus
+                    else ""
+                ),
+            ),
             system=ANSWER_SYSTEM_PROMPT,
             max_tokens=800,
             temperature=0.2,
@@ -135,7 +140,7 @@ def answer_question(
 
     citations = sorted(
         {
-            *detection["artefacts"],
+            *detection["artifacts"],
             *(r["id"] for r in context["requirements"][:5]),
             *(t["id"] for t in context["tests"]["top"][:5]),
             *(d["id"] for d in context["historical_defects"][:3]),
@@ -153,8 +158,8 @@ def answer_question(
 
 
 def _focus_context(state: dict[str, Any], detection: dict[str, Any]) -> dict[str, Any]:
-    """Pull the exact artefacts the question names (e.g. 'why was TC-1042 selected?')."""
-    wanted = set(detection["artefacts"])
+    """Pull the exact artifacts the question names (e.g. 'why was TC-1042 selected?')."""
+    wanted = set(detection["artifacts"])
     if not wanted:
         return {}
     focus: dict[str, Any] = {}
@@ -202,9 +207,9 @@ def _deterministic_answer(
     selection = state.get("test_selection") or {}
     if focus:
         parts = []
-        for artefact, detail in focus.items():
+        for artifact, detail in focus.items():
             reason = detail.get("why_selected") or detail.get("why") or detail.get("body", "")
-            parts.append(f"{artefact}: {reason}")
+            parts.append(f"{artifact}: {reason}")
         return " ".join(parts)
     if detection["intent"] == "TEST_RECOMMENDATION":
         distribution = selection.get("priority_distribution", {})

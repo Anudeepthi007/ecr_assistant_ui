@@ -1,4 +1,4 @@
-"""Retrieval step: review comments and evidence artefacts.
+"""Retrieval step: review comments and evidence artifacts.
 
 This is the step that replaces "scroll through every comment thread and
 evidence folder to work out what was decided".
@@ -45,7 +45,7 @@ def collaboration_step(state: dict[str, Any]) -> dict[str, Any]:
         3,
     )
     baseline = (
-        f"Collected {len(comments)} comment(s) and {len(evidence)} evidence artefact(s) for {ecr_id}. "
+        f"Collected {len(comments)} comment(s) and {len(evidence)} evidence artifact(s) for {ecr_id}. "
         f"{len(signals['decisions'])} explicit decision(s), {len(concerns)} raised concern(s). "
         + (
             f"Evidence outcomes: {', '.join(f'{k} x{v}' for k, v in outcomes.items() if k)}. "
@@ -55,7 +55,7 @@ def collaboration_step(state: dict[str, Any]) -> dict[str, Any]:
         + (
             f"{len(gaps)} impacted requirement(s) have no evidence attached."
             if gaps
-            else "Every impacted requirement has at least one evidence artefact."
+            else "Every impacted requirement has at least one evidence artifact."
         )
     )
     reasoning = get_llm().narrate(

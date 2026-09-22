@@ -6,7 +6,7 @@
                                              [dependencies], review comments and evidence
     Correlation Agent    3. assess_impact    impacted components and recommended actions
                          4. select_tests     discover, select and order regression tests,
-                                             link every artefact to the ECR, analyse defects,
+                                             link every artifact to the ECR, analyse defects,
                                              LLM reviews the correlated bundle
     Summarization Agent  5. summarize        plain-language answer, defect summary, report
 

@@ -10,7 +10,7 @@ degradable and returns a validated Pydantic contract.
 | Retrieval | Understand the ECR | `understand_ecr` | classify the change, plan which evidence to gather |
 | Retrieval | Gather evidence | `gather_evidence` | requirements, code impact, related defects, dependencies *(optional)*, review comments and evidence |
 | Correlation | Assess impact | `assess_impact` | directly and indirectly impacted components, recommended actions |
-| Correlation | Select regression tests | `select_tests` | discover, select and order tests, link every artefact to the ECR, analyse each related defect |
+| Correlation | Select regression tests | `select_tests` | discover, select and order tests, link every artifact to the ECR, analyse each related defect |
 | Summarization | Summarize and report | `summarize` | cited answer, plain-language defect summary, full report |
 
 ### Defect analysis
@@ -51,7 +51,7 @@ step continues.
 | Code impact | `code_impact` | Python AST parse, module import graph walk, direct/indirect components, API surface | `analyze_changed_files`, `walk_import_graph`, `repository_stats` | no |
 | Historical defects | `historical_defects` | Similar incidents, root-cause clustering | `semantic_defect_search`, `defects_by_component`, `cluster_root_causes` | no |
 | Dependencies | `dependencies` | Downstream/upstream walk, decayed propagation, critical paths | `build_graph`, `downstream_walk`, `upstream_walk`, `critical_paths` | **yes** |
-| Comments & evidence | `collaboration_retrieval` | Review threads and evidence artefacts, decisions/risks/scope extraction, evidence gaps | `comments_for_ecr`, `evidence_for_ecr`, `extract_comment_signals`, `evidence_gaps` | no |
+| Comments & evidence | `collaboration_retrieval` | Review threads and evidence artifacts, decisions/risks/scope extraction, evidence gaps | `comments_for_ecr`, `evidence_for_ecr`, `extract_comment_signals`, `evidence_gaps` | no |
 
 ### Change classification
 
@@ -91,7 +91,7 @@ labelled on the event stream with the name of the agent that owns it.
 | Test discovery | `test_discovery` | Requirement traceability + component coverage + semantic search, domain-scoped | `tests_by_requirement`, `tests_by_component`, `semantic_test_search`, `resolve_domain` |
 | Selection | `test_selection` | Weighted 0-100 relevance per test, threshold filter, P0-P3 banding | `selection_engine.select` |
 | Prioritisation | `test_prioritization` | Priority-first execution order with fastest-feedback tie-break | `selection_engine.prioritise` |
-| Artefact links | `correlation` | Typed, explained edges between the ECR and every artefact; cross-source corroboration | `build_correlation_graph` |
+| Artifact links | `correlation` | Typed, explained edges between the ECR and every artifact; cross-source corroboration | `build_correlation_graph` |
 | Bundle review | `correlation_review` | **LLM request 2**: contradictions, gaps and key links across the correlated sources; every identifier is checked against the bundle and unknown ones are dropped | `llm.review_correlation` |
 
 ### Blast radius vs. reachability
@@ -113,9 +113,9 @@ the blast radius of a copy tweak.
 | `AFFECTED` | defect -> component |
 | `RECOMMENDED_TEST` | ECR -> test case |
 | `VERIFIED_BY` | requirement -> test case |
-| `DISCUSSED_IN` | artefact -> comment |
-| `REFERENCES` | comment -> artefact |
-| `EVIDENCED_BY` | artefact -> evidence |
+| `DISCUSSED_IN` | artifact -> comment |
+| `REFERENCES` | comment -> artifact |
+| `EVIDENCED_BY` | artifact -> evidence |
 | `IMPACTS_COMPONENT` / `TOUCHES_COMPONENT` | ECR -> component |
 
 Every edge carries a `reason` string and a weight, which is what makes the final

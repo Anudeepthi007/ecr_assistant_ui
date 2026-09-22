@@ -74,7 +74,7 @@ def test_analysing_keeps_the_exported_status(client):
 def test_chat_understands_short_ecr_ids_and_export_test_ids():
     detection = detect_intent("why was L2R26: TC2 selected for ECR-1?")
     assert detection["ecr_id"] == "ECR-1"
-    assert "L2R26:TC2" in detection["artefacts"]
+    assert "L2R26:TC2" in detection["artifacts"]
     assert detect_intent("analyse ECR-2026-001")["ecr_id"] == "ECR-2026-001"
     assert detect_intent("what about ecr 2026 7")["ecr_id"] == "ECR-2026-7"
 

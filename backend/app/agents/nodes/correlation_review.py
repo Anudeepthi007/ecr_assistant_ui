@@ -1,6 +1,6 @@
 """Part of the *select_tests* step: the Correlation Agent's LLM reviews the bundle.
 
-The graph in :mod:`correlation` records *which* artefacts are linked. It cannot
+The graph in :mod:`correlation` records *which* artifacts are linked. It cannot
 see that a reviewer's concern contradicts a passing test run, or that a defect
 likely to return has no evidence. The model reads the whole correlated bundle
 and reports the links that matter, the contradictions and the gaps - the
@@ -30,6 +30,10 @@ PASSING = {"PASS", "PASSED", "APPROVED", "SUCCESS"}
 class Finding(BaseModel):
     ids: list[str] = Field(default_factory=list)
     text: str = ""
+    # "EVIDENCE" marks a finding that only exists because evidence is missing or
+    # disputed. The report still shows these; the executive summary filters them
+    # out (see summarization.summary_context).
+    kind: str = ""
 
 
 class CorrelationReview(BaseModel):
@@ -73,8 +77,8 @@ def _rule_review(state: dict[str, Any]) -> CorrelationReview:
 
     key_links = [
         Finding(
-            ids=[item["artefact"]],
-            text=f"{item['artefact']} is backed by {item['source_count']} separate sources "
+            ids=[item["artifact"]],
+            text=f"{item['artifact']} is backed by {item['source_count']} separate sources "
             f"({', '.join(item['sources'])}).",
         )
         for item in (correlation.get("corroborated") or [])[:4]
@@ -97,12 +101,17 @@ def _rule_review(state: dict[str, Any]) -> CorrelationReview:
                         text=f"{comment.get('author') or 'A reviewer'} raised a concern about {target} "
                         f"({comment['comment_id']}), but {', '.join(runs[:2])} recorded a pass. "
                         "Check that the evidence really covers the concern.",
+                        kind="EVIDENCE",
                     )
                 )
                 break
 
     gaps = [
-        Finding(ids=[rid], text=f"{rid} is impacted by this change but has no evidence attached.")
+        Finding(
+            ids=[rid],
+            text=f"{rid} is impacted by this change but has no evidence attached.",
+            kind="EVIDENCE",
+        )
         for rid in (collaboration.get("evidence_gaps") or [])[:4]
     ]
     gaps += [
@@ -115,7 +124,7 @@ def _rule_review(state: dict[str, Any]) -> CorrelationReview:
     ][:4]
 
     summary = (
-        f"{len(key_links)} artefact(s) are confirmed by more than one source, "
+        f"{len(key_links)} artifact(s) are confirmed by more than one source, "
         f"{len(conflicts)} contradiction(s) and {len(gaps)} gap(s) were found."
     )
     return CorrelationReview(
@@ -197,7 +206,11 @@ def _grounded(findings: list[Finding], known: set[str]) -> list[dict[str, Any]]:
         ids = [i for i in dict.fromkeys(finding.ids) if i in known]
         text = " ".join(finding.text.split())
         if ids and text:
-            kept.append({"ids": ids, "text": text[:400]})
+            row = {"ids": ids, "text": text[:400]}
+            # Keep the EVIDENCE tag so summary_context can leave these out of the summary.
+            if finding.kind.strip():
+                row["kind"] = finding.kind.strip().upper()
+            kept.append(row)
     return kept[:MAX_FINDINGS]
 
 

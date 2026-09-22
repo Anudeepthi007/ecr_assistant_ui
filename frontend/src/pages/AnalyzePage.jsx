@@ -256,7 +256,7 @@ function ecrDetailRows(record) {
     ["Test Actual Time", record.test_actual_time],
     ["Description", record.description],
     ["Affected Test Cases", joined(record.affected_test_cases)],
-    ["Steps to Reproduce", record.steps_to_reproduce],
+    ["Steps to Reproduce", record.steps_to_reproduce?.trim() || "No steps to reproduce provided for this ECR."],
     ["Observed Behavior", record.observed_behavior],
     ["Expected Behavior", record.expected_behavior],
     ["Attachments", joined(record.attachments)],
@@ -390,9 +390,10 @@ function TestsSection({ tests, selection }) {
     <div className="space-y-3">
       {selection && (
         <p className="text-sm">
-          {selection.selected_tests?.length || 0} of {selection.total_available} tests recommended - about{" "}
-          {Math.round(selection.estimated_duration_minutes || 0)} min instead of{" "}
-          {Math.round(selection.baseline_duration_minutes || 0)} min.
+          {selection.selected_tests?.length || 0} of {selection.total_available} tests recommended
+          {selection.reduction_percentage
+            ? ` - ${Math.round(selection.reduction_percentage)}% fewer to run.`
+            : "."}
         </p>
       )}
       <PreviewTable

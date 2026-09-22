@@ -1,4 +1,4 @@
-"""Human artefacts attached to a change: review comments and evidence.
+"""Human artifacts attached to a change: review comments and evidence.
 
 These are the sources engineers currently read by hand across several systems
 (ADO work item discussions, review threads, test evidence attachments), which
@@ -52,7 +52,7 @@ class Comment(IdMixin, Base):
 
 
 class Evidence(IdMixin, Base):
-    """An artefact proving something about the change (run, log, review, doc)."""
+    """An artifact proving something about the change (run, log, review, doc)."""
 
     __tablename__ = "evidence"
 

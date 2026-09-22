@@ -1,4 +1,4 @@
-"""Tools for retrieving human artefacts: review comments and evidence.
+"""Tools for retrieving human artifacts: review comments and evidence.
 
 These are the sources a user would otherwise open one by one (work item
 discussions, review threads, test evidence folders).
@@ -14,7 +14,7 @@ from app.agents.tools.registry import tool
 from app.models import Comment, Evidence
 
 
-@tool("comments_for_ecr", "Fetch every review comment attached to an ECR or its linked artefacts.")
+@tool("comments_for_ecr", "Fetch every review comment attached to an ECR or its linked artifacts.")
 def comments_for_ecr(
     db: Session, ecr_id: str, *, related_ids: Iterable[str] = ()
 ) -> list[dict[str, Any]]:
@@ -30,7 +30,7 @@ def comments_for_ecr(
     )
 
 
-@tool("evidence_for_ecr", "Fetch evidence artefacts (runs, reviews, documents) for an ECR.")
+@tool("evidence_for_ecr", "Fetch evidence artifacts (runs, reviews, documents) for an ECR.")
 def evidence_for_ecr(
     db: Session, ecr_id: str, *, related_ids: Iterable[str] = ()
 ) -> list[dict[str, Any]]:
@@ -79,7 +79,7 @@ def extract_comment_signals(comments: list[dict[str, Any]]) -> dict[str, list[di
     return signals
 
 
-@tool("evidence_gaps", "Identify artefacts that have no supporting evidence yet.")
+@tool("evidence_gaps", "Identify artifacts that have no supporting evidence yet.")
 def evidence_gaps(evidence: list[dict[str, Any]], expected_targets: Iterable[str]) -> list[str]:
     covered = {item.get("target_id") for item in evidence if item.get("target_id")}
     return sorted({target for target in expected_targets if target and target not in covered})

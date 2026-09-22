@@ -88,3 +88,6 @@ android-sdk/
 credentials.json
 *.key
 .credentials
+
+# Office lock files
+~$*

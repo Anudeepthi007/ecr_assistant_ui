@@ -45,7 +45,7 @@ def test_enterprise_adapters_fail_loudly_until_configured():
 
 def test_source_system_inventory_marks_what_is_connected(database):
     systems = source_systems()
-    # several local providers share the "local" key, one per artefact kind
+    # several local providers share the "local" key, one per artifact kind
     local = [entry for entry in systems if entry["key"] == "local"]
     assert len(local) == 4 and all(entry["connected"] for entry in local)
     remote = [entry for entry in systems if entry["key"] != "local"]

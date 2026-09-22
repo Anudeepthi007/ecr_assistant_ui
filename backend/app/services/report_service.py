@@ -15,7 +15,7 @@ from app.services.confidence import compute_confidence
 
 SECTION_ORDER = [
     ("executive_summary", "Executive Summary"),
-    ("ecr_overview", "ECR Overview"),
+    ("ecr_overview", "Steps to Reproduce"),
     ("change_classification", "Change Classification"),
     ("affected_requirements", "Affected Requirements"),
     ("historical_defects", "Defect Analysis"),
@@ -65,6 +65,9 @@ def build_report(state: dict[str, Any]) -> ECRIntelligenceReport:
             "requested_by": ecr.get("requested_by", ""),
             "target_release": ecr.get("target_release", ""),
             "changed_files": ecr.get("changed_files", []),
+            "steps_to_reproduce": ecr.get("steps_to_reproduce", ""),
+            "observed_behavior": ecr.get("observed_behavior", ""),
+            "expected_behavior": ecr.get("expected_behavior", ""),
         },
         change_classification=state.get("ecr_analysis"),
         retrieval_plan=state.get("retrieval_plan") or {},
@@ -88,10 +91,10 @@ def build_report(state: dict[str, Any]) -> ECRIntelligenceReport:
             "candidate_tests": selection.get("total_candidates", 0),
             "selected_tests": len(selection.get("selected_tests") or []),
             "reduction_percentage": selection.get("reduction_percentage", 0.0),
-            "estimated_duration_minutes": selection.get("estimated_duration_minutes", 0.0),
-            "baseline_duration_minutes": selection.get("baseline_duration_minutes", 0.0),
+            # Execution-time estimates are intentionally not published on the report:
+            # no record states how long a suite takes to run.
             "priority_distribution": selection.get("priority_distribution", {}),
-            "correlated_artefacts": len((correlation.get("graph") or {}).get("nodes") or []),
+            "correlated_artifacts": len((correlation.get("graph") or {}).get("nodes") or []),
             "correlated_links": len((correlation.get("graph") or {}).get("edges") or []),
             "comments": collaboration.get("comment_count", 0),
             "evidence": collaboration.get("evidence_count", 0),
@@ -128,7 +131,12 @@ def _build_sections(report: ECRIntelligenceReport, state: dict[str, Any]) -> lis
         if key == "executive_summary":
             body = report.executive_summary
         elif key == "ecr_overview":
-            body = report.ecr_overview.get("description", "")
+            # Show only the dedicated field. Falling back to the description made
+            # the section claim steps the record never supplied.
+            body = (
+                (report.ecr_overview.get("steps_to_reproduce") or "").strip()
+                or "No steps to reproduce provided for this ECR."
+            )
             data = report.ecr_overview
         elif key == "change_classification":
             body = classification.get("summary", "")
@@ -234,8 +242,6 @@ def render_markdown(report: ECRIntelligenceReport) -> str:
             f"| Candidates discovered | {metrics.get('candidate_tests', 0)} tests |",
             f"| AI recommended | {metrics.get('selected_tests', 0)} tests |",
             f"| Reduction | {metrics.get('reduction_percentage', 0)}% |",
-            f"| Estimated runtime | {metrics.get('estimated_duration_minutes', 0)} min "
-            f"(baseline {metrics.get('baseline_duration_minutes', 0)} min) |",
             "",
         ]
     for section in report.sections:

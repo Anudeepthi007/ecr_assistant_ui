@@ -116,7 +116,7 @@ def test_every_selected_test_is_explained(demo_state):
         assert test["priority"] in ("P0", "P1", "P2", "P3")
 
 
-def test_correlation_links_artefacts_to_the_ecr(demo_state):
+def test_correlation_links_artifacts_to_the_ecr(demo_state):
     graph = demo_state["correlation"]["graph"]
     types = {node["type"] for node in graph["nodes"]}
     assert {"REQUIREMENT", "TEST_CASE", "DEFECT", "COMMENT", "EVIDENCE"} <= types
@@ -171,7 +171,7 @@ def test_defect_summary_uses_component_history_when_nothing_matches():
     assert "Search Service" in text and "40 days ago" in text and "BUG-9" in text
 
 
-def test_answer_cites_real_artefacts(demo_state):
+def test_answer_cites_real_artifacts(demo_state):
     citations = demo_state["answer_citations"]
     assert citations
     known = {r["requirement_id"] for r in demo_state["requirements"]} | {

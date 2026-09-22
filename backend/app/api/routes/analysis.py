@@ -192,8 +192,8 @@ def get_tests(
         "total_candidates": selection.get("total_candidates", 0),
         "selected": len(selection.get("selected_tests") or []),
         "reduction_percentage": selection.get("reduction_percentage", 0.0),
-        "estimated_duration_minutes": selection.get("estimated_duration_minutes", 0.0),
-        "baseline_duration_minutes": selection.get("baseline_duration_minutes", 0.0),
+        # Execution-time estimates are not published - no record states how long a
+        # suite takes to run.
         "priority_distribution": selection.get("priority_distribution", {}),
         "waves": (prioritization or {}).get("waves", {}),
         "strategy": (prioritization or {}).get("strategy", ""),

@@ -2,7 +2,7 @@
 
 Indexes requirements, defects, test cases and ECR descriptions, then serves
 hybrid retrieval (dense vector similarity + lexical keyword overlap) to the
-agents. Hybrid scoring matters here: enterprise artefacts are short and full of
+agents. Hybrid scoring matters here: enterprise artifacts are short and full of
 identifiers, where pure dense retrieval alone is brittle.
 
 Embeddings are cached in a file next to the data (not in the CSVs), keyed by a

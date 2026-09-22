@@ -83,7 +83,7 @@ AGENT_CATALOG: list[AgentDescriptor] = [
             "Given an ECR number, use the LLM to plan what to search for, then gather everything "
             "that exists about it: the change record, traced and semantically matched "
             "requirements, historical defects, code impact, dependency reach, review comments "
-            "and evidence artefacts."
+            "and evidence artifacts."
         ),
         tools=[
             "classify_change",
@@ -108,7 +108,7 @@ AGENT_CATALOG: list[AgentDescriptor] = [
         key="correlation_agent",
         name="Correlation Agent",
         purpose=(
-            "Connect every retrieved artefact to the ECR with typed, explained links, find the "
+            "Connect every retrieved artifact to the ECR with typed, explained links, find the "
             "impacted components, decide which regression tests actually matter, check "
             "whether each related defect could happen again, and use the LLM to find the "
             "contradictions and gaps across the correlated sources."

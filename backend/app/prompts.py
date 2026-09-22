@@ -46,6 +46,9 @@ RETRIEVAL_SYSTEM_PROMPT = (
 
 RETRIEVAL_TASK = """Change request {ecr_id}: {title}
 {description}
+Steps to reproduce: {steps_to_reproduce}
+Observed behaviour: {observed_behavior}
+Expected behaviour: {expected_behavior}
 Files: {changed_files}
 Linked requirements: {linked_requirements}
 Rule-based check: {classification}
@@ -85,12 +88,13 @@ Send back:
 - summary: up to three short sentences about this change request only.
 - key_links, conflicts and gaps: up to {max_findings} each, written as \
 {{"ids": [...], "text": "one sentence under 30 words"}}, using only IDs from above. \
+Add "kind": "EVIDENCE" to a finding that is only about evidence being missing or disputed. \
 Use an empty list if there's nothing.
 
 Keep it short, on one line."""
 
 
-# 3. Summarization Agent - answers the question (also used by "Ask a Question").
+# 3. Summarization Agent - answers the question (also used by "Ask a Question", with CHAT_TASK).
 ANSWER_SYSTEM_PROMPT = (
     "You're the Summarization Agent. Answer the question about this one change request using "
     "only its own information: the answer first, then the two or three facts behind it, then "
@@ -111,7 +115,8 @@ This change request and everything that belongs to it:
 {bundle}
 
 Send back:
-- answer: up to 8 sentences, about this change request only.
+- answer: up to 8 sentences, about this change request only. Don't mention evidence, test runs \
+recorded as proof, or missing evidence - the report shows those in their own section.
 {defect_instruction}"""
 
 # Only used when past bugs were linked to the change.
@@ -121,6 +126,17 @@ SUMMARY_DEFECT_INSTRUCTION = (
 )
 
 SUMMARY_NO_DEFECT_INSTRUCTION = "- defect_summary: an empty string."
+
+# "Ask a Question" on an analysed ECR - a plain-text reply, not JSON.
+# {focus} is empty, or the IDs the question names with their details.
+CHAT_TASK = """QUESTION: {question}
+
+CORRELATED BUNDLE FOR {ecr_id}:
+{bundle}
+
+{focus}Answer in at most 6 sentences, citing the identifiers you used."""
+
+CHAT_FOCUS = "FOCUS ARTIFACTS:\n{focus}\n\n"
 
 
 # Optional step explanations - only used when LLM_NARRATION=true.

@@ -28,7 +28,7 @@ Give it an ECR number and exactly three agents do the manual work:
 1. **Retrieval Agent** - pulls the ECR record, traced and semantically matched
    requirements, historical defects, code impact, dependency reach, review
    comments and evidence.
-2. **Correlation Agent** - links every artefact to the ECR, works out which
+2. **Correlation Agent** - links every artifact to the ECR, works out which
    components are impacted and selects the regression tests that matter.
 3. **Summarization Agent** - answers in plain language with citations and
    publishes the report.

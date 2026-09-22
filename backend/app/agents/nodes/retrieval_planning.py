@@ -78,6 +78,9 @@ def retrieval_planning_step(state: dict[str, Any]) -> dict[str, Any]:
                 ecr_id=ecr.get("ecr_id"),
                 title=ecr.get("title"),
                 description=ecr.get("description"),
+                steps_to_reproduce=(ecr.get("steps_to_reproduce") or "").strip() or "not recorded",
+                observed_behavior=(ecr.get("observed_behavior") or "").strip() or "not recorded",
+                expected_behavior=(ecr.get("expected_behavior") or "").strip() or "not recorded",
                 changed_files=json.dumps(ecr.get("changed_files") or []),
                 linked_requirements=json.dumps(ecr.get("linked_requirements") or []),
                 classification=json.dumps(

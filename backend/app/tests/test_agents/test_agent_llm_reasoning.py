@@ -84,7 +84,7 @@ def test_without_an_llm_retrieval_uses_the_rule_keywords():
     assert retrieval_planning.search_query({**ECR_STATE, **out}) == "Tune braking. Adjust the curve."
 
 
-def test_correlation_agent_llm_findings_must_cite_real_artefacts(monkeypatch):
+def test_correlation_agent_llm_findings_must_cite_real_artifacts(monkeypatch):
     fake = FakeLLM(
         {
             "CorrelationReview": {
